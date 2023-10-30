@@ -1,0 +1,110 @@
+#!/bin/bash
+#Script created by Aldo Barrios
+date  > /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------HealthCheck is starting----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------Memory ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+free -h >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------Disk Usage ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+df -h >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------Inodes Usage ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+df -i >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------Processes Performance, Load, Steam Time ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+top -bcn1 -o %MEM |head -20 >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------Wavenet Applications running status ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+/etc/init.d/campaign_emitter.system status >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+/etc/init.d/campaign_http_requester.system status >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+/etc/init.d/campaign_scheduler.system status >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+/etc/init.d/file_uploader.system status >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+/etc/init.d/prime_log.system status >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "Yaws status" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+/etc/init.d/yaws status >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "Flume status" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+ps -fea |grep -v grep | grep "flume.node.Application" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------Wavenet applications net ping status ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "Campaign_emitter" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo $(/opt/erl_call -s -a "net ping ["campaign_emitter@${HOSTNAME}"]" -name campaign_emitter@${HOSTNAME} -c wavenetni;) >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "campaign_http_requester" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo $(/opt/erl_call -s -a "net ping ["campaign_http_requester@${HOSTNAME}"]" -name campaign_http_requester@${HOSTNAME} -c wavenetni;) >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "campaign_scheduler" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo $(/opt/erl_call -s -a "net ping ["campaign_scheduler@${HOSTNAME}"]" -name campaign_scheduler@${HOSTNAME} -c wavenetni;) >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "file_uploader" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo $(/opt/erl_call -s -a "net ping ["file_uploader@${HOSTNAME}"]" -name file_uploader@${HOSTNAME} -c wavenetni;) >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "prime_log" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo $(/opt/erl_call -s -a "net ping ["prime_log@${HOSTNAME}"]" -name prime_log@${HOSTNAME} -c wavenetni;) >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------Wavenet applications mnesia db node status ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "campaign_emitter" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo $(/opt/erl_call -a 'mnesia system_info [running_db_nodes]' -sname campaign_emitter@${HOSTNAME} -c wavenetni | awk '{print $0}') >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "campaign_http_requester" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo $(/opt/erl_call -a 'mnesia system_info [running_db_nodes]' -sname campaign_http_requester@${HOSTNAME} -c wavenetni | awk '{print $0}') >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "campaign_scheduler" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo $(/opt/erl_call -a 'mnesia system_info [running_db_nodes]' -sname campaign_scheduler@${HOSTNAME} -c wavenetni | awk '{print $0}') >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "file_uploader" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo $(/opt/erl_call -a 'mnesia system_info [running_db_nodes]' -sname file_uploader@${HOSTNAME} -c wavenetni | awk '{print $0}') >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "prime_log" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo $(/opt/erl_call -a 'mnesia system_info [running_db_nodes]' -sname prime_log@${HOSTNAME} -c wavenetni | awk '{print $0}') >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "yaws" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo $(/opt/erl_call -a 'mnesia system_info [running_db_nodes]' -sname yaws_app@${HOSTNAME} -c wavenetni | awk '{print $0}') >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------Patches ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "campaign_emitter" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+ls -ltrh /opt/campaign_emitter/patches |grep patch |wc -l >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "campaign_http_requester" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+ls -ltrh /opt/campaign_http_requester/patches |grep patch |wc -l  >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "campaign_scheduler" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+ls -ltrh /opt/campaign_scheduler/patches |grep patch |wc -l >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "file_uploader" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+ls -ltrh /opt/file_uploader/patches |grep patch |wc -l >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "prime_log" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+ls -ltrh /opt/prime/prime_log/patches |grep patch |wc -l >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "wavenet_cam" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------CDR being inserted into CRS db----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+# echo "Campaign Manager CDR" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+# ssh wnsup@10.86.74.74 "mysql -Auroot -pcampaign_mgr -e \"select * from campaign order by id desc limit 3;\" campaign_mgr" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "CMS_FULL_CDR" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+cat /opt/prime/prime_log/logs/campaign_manager_cdr/backup/CMS_FULL_CDR_2_$(date +"%y%m%d")* | cut -d, -f1|sort |uniq -c >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------Third Party Application status ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "Zabbix Agent" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+service zabbix-agent status|egrep "Loaded:|Active:"  >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "SSH" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+service sshd status|egrep "Loaded:|Active:"  >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "NTP" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+service ntpd status|egrep "Loaded:|Active:"  >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+ntpq -p  >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------Errors in logs ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "cron (/var/log/cron)" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+cat /var/log/cron | grep -i error | wc -l >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "messages (/var/log/messages)" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+cat /var/log/cron | grep -i error | wc -l >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "campaign_emitter" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+find /opt/campaign_emitter/logs/ -name "erlang.log*" -mtime -1 | xargs grep -i "CRASH"|wc -l >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "campaign_http_requester" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+find /opt/campaign_http_requester/logs/ -name "erlang.log*" -mtime -1 | xargs grep -i "CRASH"|wc -l >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "campaign_scheduler" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+find /opt/campaign_scheduler/logs/ -name "erlang.log*" -mtime -1 | xargs grep -i "CRASH"|wc -l >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "file_uploader" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+find /opt/file_uploader/logs/ -name "erlang.log*" -mtime -1 | xargs grep -i "CRASH"|wc -l >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------Check IP Address ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+ip addr show >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------TPS (each server has 800TPS capacity AO+MO) ${HOSTNAME}----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "MO $(date -d "1 day ago" +"%Y-%m-%d") (TPS Date Hour)" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+# zcat -f /opt/prime/prime_log/logs/full_cdr/backup/$(date -d "1 day ago" +"%y%m%d")*| grep '^8,\|^9,' |awk -F"," '{if($44=="0") print $2}' |sort | uniq -c|sort -nk1 |tail -3 | head -1 >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "AO $(date -d "1 day ago" +"%Y-%m-%d") (TPS Date Hour)" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+# zcat -f /opt/prime/prime_log/logs/smpp_full_cdr/backup/$(date -d "1 day ago" +"%y%m%d")*| grep '^8,\|^9,' | awk -F"," '{if($37=="1") print $2}' |sort | uniq -c|sort -nk1 |tail -3 | head -1 >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "----------HelathCheck has finished----------" >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+date  >> /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt
+echo "The Healthcheck script has Finished, the file location is /logs/Healthcheck_output_${HOSTNAME}_$(date +"%Y%m%d").txt"
+
